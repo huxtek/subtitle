@@ -10,6 +10,11 @@ import json
 from typing import List, Dict, Any
 from faster_whisper import WhisperModel
 
+# Load shared configuration
+with open('../shared-config.json', 'r') as f:
+    config = json.load(f)
+    SUBTITLE_STYLES = config['subtitleStyles']
+
 app = FastAPI()
 
 app.add_middleware(
@@ -165,8 +170,12 @@ async def download_video_with_subtitles(filename: str):
     # Create video with embedded subtitles
     output_path = f"uploads/{filename.rsplit('.', 1)[0]}_with_subtitles.mp4"
     
-    # Use ffmpeg to burn subtitles into the video with styling
-    subtitle_filter = f"subtitles={srt_path}:force_style='FontName=Arial,FontSize=24,PrimaryColour=&Hffffff,OutlineColour=&H000000,Outline=2,Shadow=1,Alignment=2'"
+    # Convert rgba to ffmpeg format
+    bg_opacity = int(0.8 * 255)  # Extract 0.8 from rgba(0, 0, 0, 0.8)
+    bg_hex = f"&H{bg_opacity:02x}000000"
+    
+    # Use ffmpeg to burn subtitles with shared styling
+    subtitle_filter = f"subtitles={srt_path}:force_style='FontName={SUBTITLE_STYLES['fontFamily']},FontSize={SUBTITLE_STYLES['fontSize']},Bold=1,PrimaryColour=&Hffffff,BackColour={bg_hex},BorderStyle=3,Outline=0,Shadow=0,Alignment=2,MarginV={SUBTITLE_STYLES['bottomMargin']}'"
     cmd = [
         'ffmpeg', '-i', video_path, '-vf', subtitle_filter,
         '-c:a', 'copy',  # Copy audio without re-encoding

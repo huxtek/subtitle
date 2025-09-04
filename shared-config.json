@@ -1,0 +1,13 @@
+{
+  "subtitleStyles": {
+    "fontFamily": "Arial",
+    "fontSize": 18,
+    "fontWeight": "bold",
+    "color": "#ffffff",
+    "backgroundColor": "rgba(0, 0, 0, 0.8)",
+    "padding": "8px 16px",
+    "borderRadius": "4px",
+    "bottomMargin": 60,
+    "alignment": "center"
+  }
+}
