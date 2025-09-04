@@ -155,6 +155,26 @@ async def download_srt(filename: str):
         raise HTTPException(status_code=404, detail="SRT file not found")
     return FileResponse(srt_path, media_type='text/plain', filename=filename.rsplit('.', 1)[0] + '.srt')
 
+@app.post("/update-subtitles/{filename}")
+async def update_subtitles(filename: str, subtitles: List[Dict[str, Any]]):
+    """Update subtitle file with edited content"""
+    try:
+        srt_path = f"uploads/{filename.rsplit('.', 1)[0]}.srt"
+        
+        with open(srt_path, 'w', encoding='utf-8') as f:
+            for i, subtitle in enumerate(subtitles, 1):
+                start_time = format_srt_time(subtitle['start'])
+                end_time = format_srt_time(subtitle['end'])
+                text = subtitle['text'].strip()
+                
+                f.write(f"{i}\n")
+                f.write(f"{start_time} --> {end_time}\n")
+                f.write(f"{text}\n\n")
+        
+        return {"message": "Subtitles updated successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error updating subtitles: {str(e)}")
+
 @app.get("/download/video/{filename}")
 async def download_video_with_subtitles(filename: str, fontSize: int = 18, color: str = "#ffffff", position: int = 60):
     """Download video with embedded subtitles"""

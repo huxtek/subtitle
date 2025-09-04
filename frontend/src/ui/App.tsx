@@ -79,6 +79,16 @@ const App: React.FC = () => {
     if (videoFilename) {
       setIsDownloading(true);
       try {
+        // First update subtitles with edited content
+        await fetch(`http://localhost:8000/update-subtitles/${videoFilename}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(subtitles),
+        });
+
+        // Then download video with updated subtitles
         const response = await fetch(`http://localhost:8000/download/video/${videoFilename}?fontSize=${subtitleFontSize}&color=${encodeURIComponent(subtitleColor)}&position=${subtitlePosition}`);
         if (response.ok) {
           const blob = await response.blob();
