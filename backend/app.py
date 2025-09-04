@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 import subprocess
 import os
 import torch
@@ -18,6 +19,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve uploaded files
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Global variables for model caching
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -53,6 +57,30 @@ def extract_audio(video_path: str) -> str:
         raise Exception(f"FFmpeg error: {result.stderr}")
     
     return audio_path
+
+def format_srt_time(seconds: float) -> str:
+    """Convert seconds to SRT time format (HH:MM:SS,mmm)"""
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    secs = int(seconds % 60)
+    millisecs = int((seconds % 1) * 1000)
+    return f"{hours:02d}:{minutes:02d}:{secs:02d},{millisecs:03d}"
+
+def generate_srt_file(subtitles: List[Dict[str, Any]], video_path: str) -> str:
+    """Generate SRT subtitle file from subtitles"""
+    srt_path = video_path.rsplit('.', 1)[0] + '.srt'
+    
+    with open(srt_path, 'w', encoding='utf-8') as f:
+        for i, subtitle in enumerate(subtitles, 1):
+            start_time = format_srt_time(subtitle['start'])
+            end_time = format_srt_time(subtitle['end'])
+            text = subtitle['text'].strip()
+            
+            f.write(f"{i}\n")
+            f.write(f"{start_time} --> {end_time}\n")
+            f.write(f"{text}\n\n")
+    
+    return srt_path
 
 @app.post("/upload")
 async def upload_video(file: UploadFile):
@@ -91,12 +119,17 @@ async def upload_video(file: UploadFile):
                 "text": segment.text.strip()
             })
         
+        # Generate SRT subtitle file
+        srt_path = generate_srt_file(subtitles, file_path)
+        
         # Clean up audio file
         os.remove(audio_path)
         
         return {
             "message": "Video processed successfully", 
             "file": file.filename,
+            "video_path": file_path,
+            "srt_path": srt_path,
             "subtitles": subtitles
         }
         
@@ -108,6 +141,45 @@ async def upload_video(file: UploadFile):
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "device": device}
+
+@app.get("/download/srt/{filename}")
+async def download_srt(filename: str):
+    """Download SRT subtitle file"""
+    srt_path = f"uploads/{filename.rsplit('.', 1)[0]}.srt"
+    if not os.path.exists(srt_path):
+        raise HTTPException(status_code=404, detail="SRT file not found")
+    return FileResponse(srt_path, media_type='text/plain', filename=filename.rsplit('.', 1)[0] + '.srt')
+
+@app.get("/download/video/{filename}")
+async def download_video_with_subtitles(filename: str):
+    """Download video with embedded subtitles"""
+    video_path = f"uploads/{filename}"
+    srt_path = f"uploads/{filename.rsplit('.', 1)[0]}.srt"
+    
+    if not os.path.exists(video_path):
+        raise HTTPException(status_code=404, detail="Video file not found")
+    
+    if not os.path.exists(srt_path):
+        raise HTTPException(status_code=404, detail="SRT file not found")
+    
+    # Create video with embedded subtitles
+    output_path = f"uploads/{filename.rsplit('.', 1)[0]}_with_subtitles.mp4"
+    
+    # Use ffmpeg to embed subtitles
+    cmd = [
+        'ffmpeg', '-i', video_path, '-i', srt_path,
+        '-c:v', 'copy', '-c:a', 'copy',
+        '-c:s', 'mov_text',  # Use mov_text for better compatibility
+        '-map', '0:v', '-map', '0:a', '-map', '1:s',
+        '-metadata:s:s:0', 'language=fas',  # Set subtitle language to Farsi
+        '-y', output_path
+    ]
+    
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    if result.returncode != 0:
+        raise HTTPException(status_code=500, detail=f"Error creating video with subtitles: {result.stderr}")
+    
+    return FileResponse(output_path, media_type='video/mp4', filename=filename.rsplit('.', 1)[0] + '_with_subtitles.mp4')
 
 @app.get("/")
 async def root():
