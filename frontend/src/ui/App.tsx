@@ -167,12 +167,6 @@ const App: React.FC = () => {
                   >
                     {isDownloading ? '⏳ Processing...' : '🎥 Download Video'}
                   </button>
-                  <button
-                    onClick={() => setShowVideoPlayer(false)}
-                    className={`${styles.button} ${styles.buttonSecondary}`}
-                  >
-                    ✏️ Edit Subtitles
-                  </button>
                 </div>
               </div>
               
@@ -220,6 +214,7 @@ const App: React.FC = () => {
                 fontSize={subtitleFontSize}
                 textColor={subtitleColor}
                 bottomPosition={subtitlePosition}
+                onSubtitleChange={setSubtitles}
                 onTimeUpdate={(time) => {
                   console.log('Current time:', time);
                 }}
@@ -228,52 +223,15 @@ const App: React.FC = () => {
           )}
 
           {subtitles.length > 0 && !showVideoPlayer && (
-            <div>
-              <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>📝 Subtitles ({subtitles.length})</h2>
-                <div className={styles.buttonGroup}>
-                  <button
-                    onClick={handleDownloadSRT}
-                    className={`${styles.button} ${styles.buttonSuccess}`}
-                  >
-                    📄 Download SRT
-                  </button>
-                  <button
-                    onClick={handleDownloadVideo}
-                    disabled={isDownloading}
-                    className={`${styles.button} ${styles.buttonPrimary}`}
-                  >
-                    {isDownloading ? '⏳ Processing...' : '🎥 Download Video'}
-                  </button>
-                  <button
-                    onClick={() => setShowVideoPlayer(true)}
-                    className={`${styles.button} ${styles.buttonInfo}`}
-                  >
-                    ▶️ View Player
-                  </button>
-                </div>
-              </div>
-              <div className={styles.subtitlesList}>
-                {subtitles.map((s) => (
-                  <div key={s.id} className={styles.subtitleItem}>
-                    <div className={styles.subtitleTime}>
-                      ⏱️ {formatTime(s.start)} - {formatTime(s.end)}
-                    </div>
-                    <input
-                      type="text"
-                      value={s.text}
-                      onChange={(e) =>
-                        setSubtitles((prev) =>
-                          prev.map((sub) =>
-                            sub.id === s.id ? { ...sub, text: e.target.value } : sub
-                          )
-                        )
-                      }
-                      className={styles.subtitleInput}
-                      placeholder="Enter subtitle text..."
-                    />
-                  </div>
-                ))}
+            <div className={styles.sectionHeader}>
+              <h2 className={styles.sectionTitle}>📝 Processing Complete</h2>
+              <div className={styles.buttonGroup}>
+                <button
+                  onClick={() => setShowVideoPlayer(true)}
+                  className={`${styles.button} ${styles.buttonInfo}`}
+                >
+                  ▶️ View & Edit Video
+                </button>
               </div>
             </div>
           )}

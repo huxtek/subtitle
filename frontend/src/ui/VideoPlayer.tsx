@@ -12,6 +12,7 @@ interface VideoPlayerProps {
   textColor?: string;
   bottomPosition?: number;
   onTimeUpdate?: (currentTime: number) => void;
+  onSubtitleChange?: (subtitles: Subtitle[]) => void;
 }
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
@@ -20,7 +21,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   fontSize = subtitleStyles.fontSize,
   textColor = subtitleStyles.color,
   bottomPosition = subtitleStyles.bottomMargin,
-  onTimeUpdate 
+  onTimeUpdate,
+  onSubtitleChange
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
@@ -68,6 +70,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
       const newTime = (parseFloat(e.target.value) / 100) * duration;
       video.currentTime = newTime;
     }
+  };
+
+  const handleSubtitleEdit = (id: number, newText: string) => {
+    const updatedSubtitles = subtitles.map(sub => 
+      sub.id === id ? { ...sub, text: newText } : sub
+    );
+    onSubtitleChange?.(updatedSubtitles);
   };
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
@@ -143,9 +152,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
               <div className={styles.subtitleTime}>
                 ⏰ {formatTime(subtitle.start)} - {formatTime(subtitle.end)}
               </div>
-              <div className={styles.subtitleText}>
-                {subtitle.text}
-              </div>
+              <input
+                type="text"
+                value={subtitle.text}
+                onChange={(e) => handleSubtitleEdit(subtitle.id, e.target.value)}
+                className={styles.subtitleInput}
+                placeholder="Enter subtitle text..."
+                onClick={(e) => e.stopPropagation()}
+              />
             </div>
           ))}
         </div>
