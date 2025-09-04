@@ -10,6 +10,7 @@ const App: React.FC = () => {
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [videoFilename, setVideoFilename] = useState<string | null>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const handleUpload = async () => {
     if (!file) return;
@@ -70,6 +71,7 @@ const App: React.FC = () => {
 
   const handleDownloadVideo = async () => {
     if (videoFilename) {
+      setIsDownloading(true);
       try {
         const response = await fetch(`http://localhost:8000/download/video/${videoFilename}`);
         if (response.ok) {
@@ -88,6 +90,8 @@ const App: React.FC = () => {
       } catch (error) {
         console.error('Download error:', error);
         alert('Failed to download video with subtitles');
+      } finally {
+        setIsDownloading(false);
       }
     }
   };
@@ -151,16 +155,17 @@ const App: React.FC = () => {
               </button>
               <button
                 onClick={handleDownloadVideo}
+                disabled={isDownloading}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: '#007bff',
+                  backgroundColor: isDownloading ? '#6c757d' : '#007bff',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer'
+                  cursor: isDownloading ? 'not-allowed' : 'pointer'
                 }}
               >
-                Download Video with Subtitles
+                {isDownloading ? 'Processing...' : 'Download Video with Subtitles'}
               </button>
               <button
                 onClick={() => setShowVideoPlayer(false)}
@@ -208,16 +213,17 @@ const App: React.FC = () => {
               </button>
               <button
                 onClick={handleDownloadVideo}
+                disabled={isDownloading}
                 style={{
                   padding: '8px 16px',
-                  backgroundColor: '#007bff',
+                  backgroundColor: isDownloading ? '#6c757d' : '#007bff',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
-                  cursor: 'pointer'
+                  cursor: isDownloading ? 'not-allowed' : 'pointer'
                 }}
               >
-                Download Video with Subtitles
+                {isDownloading ? 'Processing...' : 'Download Video with Subtitles'}
               </button>
               <button
                 onClick={() => setShowVideoPlayer(true)}

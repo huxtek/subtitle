@@ -165,13 +165,11 @@ async def download_video_with_subtitles(filename: str):
     # Create video with embedded subtitles
     output_path = f"uploads/{filename.rsplit('.', 1)[0]}_with_subtitles.mp4"
     
-    # Use ffmpeg to embed subtitles
+    # Use ffmpeg to burn subtitles into the video with styling
+    subtitle_filter = f"subtitles={srt_path}:force_style='FontName=Arial,FontSize=24,PrimaryColour=&Hffffff,OutlineColour=&H000000,Outline=2,Shadow=1,Alignment=2'"
     cmd = [
-        'ffmpeg', '-i', video_path, '-i', srt_path,
-        '-c:v', 'copy', '-c:a', 'copy',
-        '-c:s', 'mov_text',  # Use mov_text for better compatibility
-        '-map', '0:v', '-map', '0:a', '-map', '1:s',
-        '-metadata:s:s:0', 'language=fas',  # Set subtitle language to Farsi
+        'ffmpeg', '-i', video_path, '-vf', subtitle_filter,
+        '-c:a', 'copy',  # Copy audio without re-encoding
         '-y', output_path
     ]
     
