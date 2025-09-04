@@ -12,6 +12,10 @@ const App: React.FC = () => {
   const [showVideoPlayer, setShowVideoPlayer] = useState(false);
   const [videoFilename, setVideoFilename] = useState<string | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
+  
+  // Subtitle style controls
+  const [subtitleFontSize, setSubtitleFontSize] = useState(18);
+  const [subtitleColor, setSubtitleColor] = useState('#ffffff');
 
   const handleUpload = async () => {
     if (!file) return;
@@ -74,7 +78,7 @@ const App: React.FC = () => {
     if (videoFilename) {
       setIsDownloading(true);
       try {
-        const response = await fetch(`http://localhost:8000/download/video/${videoFilename}`);
+        const response = await fetch(`http://localhost:8000/download/video/${videoFilename}?fontSize=${subtitleFontSize}&color=${encodeURIComponent(subtitleColor)}`);
         if (response.ok) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
@@ -160,9 +164,39 @@ const App: React.FC = () => {
                   </button>
                 </div>
               </div>
+              
+              {/* Subtitle Style Controls */}
+              <div className={styles.styleControls}>
+                <h3>🎨 Subtitle Style</h3>
+                <div className={styles.controlGroup}>
+                  <label>
+                    Font Size: {subtitleFontSize}px
+                    <input
+                      type="range"
+                      min="12"
+                      max="32"
+                      value={subtitleFontSize}
+                      onChange={(e) => setSubtitleFontSize(Number(e.target.value))}
+                      className={styles.slider}
+                    />
+                  </label>
+                  <label>
+                    Text Color:
+                    <input
+                      type="color"
+                      value={subtitleColor}
+                      onChange={(e) => setSubtitleColor(e.target.value)}
+                      className={styles.colorPicker}
+                    />
+                  </label>
+                </div>
+              </div>
+              
               <VideoPlayer 
                 videoUrl={videoUrl}
                 subtitles={subtitles}
+                fontSize={subtitleFontSize}
+                textColor={subtitleColor}
                 onTimeUpdate={(time) => {
                   console.log('Current time:', time);
                 }}

@@ -156,7 +156,7 @@ async def download_srt(filename: str):
     return FileResponse(srt_path, media_type='text/plain', filename=filename.rsplit('.', 1)[0] + '.srt')
 
 @app.get("/download/video/{filename}")
-async def download_video_with_subtitles(filename: str):
+async def download_video_with_subtitles(filename: str, fontSize: int = 18, color: str = "#ffffff"):
     """Download video with embedded subtitles"""
     video_path = f"uploads/{filename}"
     srt_path = f"uploads/{filename.rsplit('.', 1)[0]}.srt"
@@ -170,20 +170,31 @@ async def download_video_with_subtitles(filename: str):
     # Create video with embedded subtitles
     output_path = f"uploads/{filename.rsplit('.', 1)[0]}_with_subtitles.mp4"
     
-    # Convert rgba to ffmpeg format
-    bg_opacity = int(0.8 * 255)  # Extract 0.8 from rgba(0, 0, 0, 0.8)
-    bg_hex = f"&H{bg_opacity:02x}000000"
+    # Convert hex color to FFmpeg format
+    hex_color = color.lstrip('#')
+    if len(hex_color) == 6:
+        r, g, b = int(hex_color[0:2], 16), int(hex_color[2:4], 16), int(hex_color[4:6], 16)
+        ffmpeg_color = f"&H00{b:02x}{g:02x}{r:02x}"
+    else:
+        ffmpeg_color = "&H00ffffff"  # fallback to white
     
-    # Use ffmpeg to burn subtitles with shared styling
-    subtitle_filter = f"subtitles={srt_path}:force_style='FontName={SUBTITLE_STYLES['fontFamily']},FontSize={SUBTITLE_STYLES['fontSize']},Bold=1,PrimaryColour=&Hffffff,BackColour={bg_hex},BorderStyle=3,Outline=0,Shadow=0,Alignment=2,MarginV={SUBTITLE_STYLES['bottomMargin']}'"
+    # Use dynamic styling from frontend
+    smaller_font_size = int(fontSize * 0.6)  # Make it 60% of selected size
+    bottom_margin = 20  # Small value to keep subtitles close to bottom
+    subtitle_filter = f"subtitles={srt_path}:force_style='FontSize={smaller_font_size},Bold=1,PrimaryColour={ffmpeg_color},BackColour=&Hcc000000,BorderStyle=4,Alignment=2,MarginV={bottom_margin}'"
+    
     cmd = [
         'ffmpeg', '-i', video_path, '-vf', subtitle_filter,
         '-c:a', 'copy',  # Copy audio without re-encoding
         '-y', output_path
     ]
     
+    print(f"FFmpeg command: {' '.join(cmd)}")
     result = subprocess.run(cmd, capture_output=True, text=True)
+    
     if result.returncode != 0:
+        print(f"FFmpeg stderr: {result.stderr}")
+        print(f"FFmpeg stdout: {result.stdout}")
         raise HTTPException(status_code=500, detail=f"Error creating video with subtitles: {result.stderr}")
     
     return FileResponse(output_path, media_type='video/mp4', filename=filename.rsplit('.', 1)[0] + '_with_subtitles.mp4')

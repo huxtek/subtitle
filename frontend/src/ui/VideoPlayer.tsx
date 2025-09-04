@@ -8,10 +8,18 @@ const { subtitleStyles } = config;
 interface VideoPlayerProps {
   videoUrl: string;
   subtitles: Subtitle[];
+  fontSize?: number;
+  textColor?: string;
   onTimeUpdate?: (currentTime: number) => void;
 }
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, subtitles, onTimeUpdate }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ 
+  videoUrl, 
+  subtitles, 
+  fontSize = subtitleStyles.fontSize,
+  textColor = subtitleStyles.color,
+  onTimeUpdate 
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -80,10 +88,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, subtitles, onTimeUp
               style={{
                 bottom: `${subtitleStyles.bottomMargin}px`,
                 backgroundColor: subtitleStyles.backgroundColor,
-                color: subtitleStyles.color,
+                color: textColor,
                 padding: subtitleStyles.padding,
                 borderRadius: subtitleStyles.borderRadius,
-                fontSize: `${subtitleStyles.fontSize}px`,
+                fontSize: `${fontSize}px`,
                 fontWeight: subtitleStyles.fontWeight,
                 fontFamily: subtitleStyles.fontFamily,
               }}
