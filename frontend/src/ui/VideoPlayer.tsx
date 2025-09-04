@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Subtitle } from '../types';
 import config from '../../../shared-config.json';
+import styles from './VideoPlayer.module.css';
 
 const { subtitleStyles } = config;
 
@@ -62,87 +63,66 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, subtitles, onTimeUp
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
-    <div style={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
-      <div style={{ position: 'relative', backgroundColor: '#000', borderRadius: '8px', overflow: 'hidden' }}>
-        <video
-          ref={videoRef}
-          src={videoUrl}
-          controls
-          style={{ width: '100%', height: 'auto', display: 'block' }}
-        />
-        
-        {/* Subtitle overlay */}
-        {currentSubtitle && (
-          <div style={{
-            position: 'absolute',
-            bottom: `${subtitleStyles.bottomMargin}px`,
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: subtitleStyles.backgroundColor,
-            color: subtitleStyles.color,
-            padding: subtitleStyles.padding,
-            borderRadius: subtitleStyles.borderRadius,
-            fontSize: `${subtitleStyles.fontSize}px`,
-            fontWeight: subtitleStyles.fontWeight,
-            fontFamily: subtitleStyles.fontFamily,
-            textAlign: subtitleStyles.alignment,
-            maxWidth: '90%',
-            zIndex: 10
-          }}>
-            {currentSubtitle.text}
-          </div>
-        )}
-      </div>
-
-      {/* Timeline */}
-      <div style={{ marginTop: '10px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
-          <span style={{ fontSize: '12px', color: '#666' }}>
-            {formatTime(currentTime)}
-          </span>
-          <span style={{ fontSize: '12px', color: '#666' }}>
-            {formatTime(duration)}
-          </span>
+    <div className={styles.container}>
+      <div className={styles.videoSection}>
+        <div className={styles.videoWrapper}>
+          <video
+            ref={videoRef}
+            src={videoUrl}
+            controls
+            className={styles.video}
+          />
+          
+          {/* Subtitle overlay */}
+          {currentSubtitle && (
+            <div 
+              className={styles.subtitleOverlay}
+              style={{
+                bottom: `${subtitleStyles.bottomMargin}px`,
+                backgroundColor: subtitleStyles.backgroundColor,
+                color: subtitleStyles.color,
+                padding: subtitleStyles.padding,
+                borderRadius: subtitleStyles.borderRadius,
+                fontSize: `${subtitleStyles.fontSize}px`,
+                fontWeight: subtitleStyles.fontWeight,
+                fontFamily: subtitleStyles.fontFamily,
+              }}
+            >
+              {currentSubtitle.text}
+            </div>
+          )}
         </div>
-        
-        <input
-          type="range"
-          min="0"
-          max="100"
-          value={progress}
-          onChange={handleSeek}
-          style={{
-            width: '100%',
-            height: '6px',
-            background: '#ddd',
-            outline: 'none',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-        />
+
+        {/* Timeline */}
+        <div className={styles.timeline}>
+          <div className={styles.timeDisplay}>
+            <span>⏱️ {formatTime(currentTime)}</span>
+            <span>{formatTime(duration)}</span>
+          </div>
+          
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={progress}
+            onChange={handleSeek}
+            className={styles.progressBar}
+          />
+        </div>
       </div>
 
       {/* Subtitle list */}
-      <div style={{ marginTop: '20px' }}>
-        <h3 style={{ marginBottom: '10px', fontSize: '16px' }}>Subtitles Timeline</h3>
-        <div style={{ 
-          maxHeight: '200px', 
-          overflowY: 'auto', 
-          border: '1px solid #ddd', 
-          borderRadius: '4px',
-          padding: '10px'
-        }}>
+      <div className={styles.subtitlesSection}>
+        <h3 className={styles.subtitlesTitle}>
+          📋 Subtitles Timeline
+        </h3>
+        <div className={styles.subtitlesList}>
           {subtitles.map((subtitle) => (
             <div
               key={subtitle.id}
-              style={{
-                padding: '8px',
-                margin: '4px 0',
-                backgroundColor: currentSubtitle?.id === subtitle.id ? '#e3f2fd' : '#f5f5f5',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                border: currentSubtitle?.id === subtitle.id ? '2px solid #2196f3' : '2px solid transparent'
-              }}
+              className={`${styles.subtitleItem} ${
+                currentSubtitle?.id === subtitle.id ? styles.subtitleItemActive : ''
+              }`}
               onClick={() => {
                 const video = videoRef.current;
                 if (video) {
@@ -150,14 +130,10 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, subtitles, onTimeUp
                 }
               }}
             >
-              <div style={{ 
-                fontSize: '12px', 
-                color: '#666', 
-                marginBottom: '4px' 
-              }}>
-                {formatTime(subtitle.start)} - {formatTime(subtitle.end)}
+              <div className={styles.subtitleTime}>
+                ⏰ {formatTime(subtitle.start)} - {formatTime(subtitle.end)}
               </div>
-              <div style={{ fontSize: '14px' }}>
+              <div className={styles.subtitleText}>
                 {subtitle.text}
               </div>
             </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Subtitle } from '../types';
 import VideoPlayer from './VideoPlayer';
+import styles from './App.module.css';
 
 const App: React.FC = () => {
   const [file, setFile] = useState<File | null>(null);
@@ -97,187 +98,130 @@ const App: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: 20, fontFamily: 'Arial, sans-serif' }}>
-      <h1>Farsi Video Transcriber</h1>
-      
-      <div style={{ marginBottom: 20 }}>
-        <input 
-          type="file" 
-          accept="video/*" 
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          style={{ marginRight: 10 }}
-        />
-        <button 
-          onClick={handleUpload} 
-          disabled={!file || isProcessing}
-          style={{ 
-            padding: '10px 20px', 
-            backgroundColor: isProcessing ? '#ccc' : '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: isProcessing ? 'not-allowed' : 'pointer'
-          }}
-        >
-          {isProcessing ? 'Processing...' : 'استخراج گفتار (فارسی)'}
-        </button>
-      </div>
-
-      {error && (
-        <div style={{ 
-          color: 'red', 
-          backgroundColor: '#ffe6e6', 
-          padding: '10px', 
-          borderRadius: '4px',
-          marginBottom: '20px'
-        }}>
-          Error: {error}
+    <div className={styles.container}>
+      <div className={styles.card}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Farsi Video Transcriber</h1>
+          <p className={styles.subtitle}>Extract and edit Farsi subtitles from your videos</p>
         </div>
-      )}
-
-      {showVideoPlayer && videoUrl && (
-        <div style={{ marginTop: '30px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2>Video Player with Subtitles</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={handleDownloadSRT}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Download SRT
-              </button>
-              <button
-                onClick={handleDownloadVideo}
-                disabled={isDownloading}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: isDownloading ? '#6c757d' : '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isDownloading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {isDownloading ? 'Processing...' : 'Download Video with Subtitles'}
-              </button>
-              <button
-                onClick={() => setShowVideoPlayer(false)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#6c757d',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Edit Subtitles
-              </button>
+        
+        <div className={styles.content}>
+          <div className={styles.uploadSection}>
+            <div className={styles.fileInputWrapper}>
+              <input 
+                type="file" 
+                accept="video/*" 
+                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                className={styles.fileInput}
+                id="video-upload"
+              />
+              <label htmlFor="video-upload" className={styles.fileInputLabel}>
+                📁 {file ? file.name : 'Choose video file'}
+              </label>
             </div>
+            <button 
+              onClick={handleUpload} 
+              disabled={!file || isProcessing}
+              className={styles.uploadButton}
+            >
+              {isProcessing ? '⏳ Processing...' : '🎯 استخراج گفتار (فارسی)'}
+            </button>
           </div>
-          <VideoPlayer 
-            videoUrl={videoUrl}
-            subtitles={subtitles}
-            onTimeUpdate={(time) => {
-              // Optional: handle time updates
-              console.log('Current time:', time);
-            }}
-          />
-        </div>
-      )}
 
-      {subtitles.length > 0 && !showVideoPlayer && (
-        <div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-            <h2>Subtitles ({subtitles.length} segments)</h2>
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <button
-                onClick={handleDownloadSRT}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#28a745',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                Download SRT
-              </button>
-              <button
-                onClick={handleDownloadVideo}
-                disabled={isDownloading}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: isDownloading ? '#6c757d' : '#007bff',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: isDownloading ? 'not-allowed' : 'pointer'
-                }}
-              >
-                {isDownloading ? 'Processing...' : 'Download Video with Subtitles'}
-              </button>
-              <button
-                onClick={() => setShowVideoPlayer(true)}
-                style={{
-                  padding: '8px 16px',
-                  backgroundColor: '#17a2b8',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer'
-                }}
-              >
-                View Video Player
-              </button>
+          {error && (
+            <div className={styles.error}>
+              ❌ Error: {error}
             </div>
-          </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #ddd', padding: '10px' }}>
-            {subtitles.map((s) => (
-              <div key={s.id} style={{ 
-                marginBottom: '10px', 
-                padding: '10px', 
-                border: '1px solid #eee',
-                borderRadius: '4px',
-                backgroundColor: '#f9f9f9'
-              }}>
-                <div style={{ 
-                  fontSize: '12px', 
-                  color: '#666', 
-                  marginBottom: '5px' 
-                }}>
-                  {formatTime(s.start)} - {formatTime(s.end)}
+          )}
+
+          {showVideoPlayer && videoUrl && (
+            <div>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>🎬 Video Player</h2>
+                <div className={styles.buttonGroup}>
+                  <button
+                    onClick={handleDownloadSRT}
+                    className={`${styles.button} ${styles.buttonSuccess}`}
+                  >
+                    📄 Download SRT
+                  </button>
+                  <button
+                    onClick={handleDownloadVideo}
+                    disabled={isDownloading}
+                    className={`${styles.button} ${styles.buttonPrimary}`}
+                  >
+                    {isDownloading ? '⏳ Processing...' : '🎥 Download Video'}
+                  </button>
+                  <button
+                    onClick={() => setShowVideoPlayer(false)}
+                    className={`${styles.button} ${styles.buttonSecondary}`}
+                  >
+                    ✏️ Edit Subtitles
+                  </button>
                 </div>
-                <input
-                  type="text"
-                  value={s.text}
-                  onChange={(e) =>
-                    setSubtitles((prev) =>
-                      prev.map((sub) =>
-                        sub.id === s.id ? { ...sub, text: e.target.value } : sub
-                      )
-                    )
-                  }
-                  style={{ 
-                    width: '100%', 
-                    padding: '5px', 
-                    border: '1px solid #ccc',
-                    borderRadius: '3px'
-                  }}
-                />
               </div>
-            ))}
-          </div>
+              <VideoPlayer 
+                videoUrl={videoUrl}
+                subtitles={subtitles}
+                onTimeUpdate={(time) => {
+                  console.log('Current time:', time);
+                }}
+              />
+            </div>
+          )}
+
+          {subtitles.length > 0 && !showVideoPlayer && (
+            <div>
+              <div className={styles.sectionHeader}>
+                <h2 className={styles.sectionTitle}>📝 Subtitles ({subtitles.length})</h2>
+                <div className={styles.buttonGroup}>
+                  <button
+                    onClick={handleDownloadSRT}
+                    className={`${styles.button} ${styles.buttonSuccess}`}
+                  >
+                    📄 Download SRT
+                  </button>
+                  <button
+                    onClick={handleDownloadVideo}
+                    disabled={isDownloading}
+                    className={`${styles.button} ${styles.buttonPrimary}`}
+                  >
+                    {isDownloading ? '⏳ Processing...' : '🎥 Download Video'}
+                  </button>
+                  <button
+                    onClick={() => setShowVideoPlayer(true)}
+                    className={`${styles.button} ${styles.buttonInfo}`}
+                  >
+                    ▶️ View Player
+                  </button>
+                </div>
+              </div>
+              <div className={styles.subtitlesList}>
+                {subtitles.map((s) => (
+                  <div key={s.id} className={styles.subtitleItem}>
+                    <div className={styles.subtitleTime}>
+                      ⏱️ {formatTime(s.start)} - {formatTime(s.end)}
+                    </div>
+                    <input
+                      type="text"
+                      value={s.text}
+                      onChange={(e) =>
+                        setSubtitles((prev) =>
+                          prev.map((sub) =>
+                            sub.id === s.id ? { ...sub, text: e.target.value } : sub
+                          )
+                        )
+                      }
+                      className={styles.subtitleInput}
+                      placeholder="Enter subtitle text..."
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 };
