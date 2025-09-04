@@ -156,7 +156,7 @@ async def download_srt(filename: str):
     return FileResponse(srt_path, media_type='text/plain', filename=filename.rsplit('.', 1)[0] + '.srt')
 
 @app.get("/download/video/{filename}")
-async def download_video_with_subtitles(filename: str, fontSize: int = 18, color: str = "#ffffff"):
+async def download_video_with_subtitles(filename: str, fontSize: int = 18, color: str = "#ffffff", position: int = 60):
     """Download video with embedded subtitles"""
     video_path = f"uploads/{filename}"
     srt_path = f"uploads/{filename.rsplit('.', 1)[0]}.srt"
@@ -180,7 +180,7 @@ async def download_video_with_subtitles(filename: str, fontSize: int = 18, color
     
     # Use dynamic styling from frontend
     smaller_font_size = int(fontSize * 0.6)  # Make it 60% of selected size
-    bottom_margin = 20  # Small value to keep subtitles close to bottom
+    bottom_margin = max(10, position // 3)  # Scale position for FFmpeg
     subtitle_filter = f"subtitles={srt_path}:force_style='FontSize={smaller_font_size},Bold=1,PrimaryColour={ffmpeg_color},BackColour=&Hcc000000,BorderStyle=4,Alignment=2,MarginV={bottom_margin}'"
     
     cmd = [

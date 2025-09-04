@@ -10,6 +10,7 @@ interface VideoPlayerProps {
   subtitles: Subtitle[];
   fontSize?: number;
   textColor?: string;
+  bottomPosition?: number;
   onTimeUpdate?: (currentTime: number) => void;
 }
 
@@ -18,6 +19,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   subtitles, 
   fontSize = subtitleStyles.fontSize,
   textColor = subtitleStyles.color,
+  bottomPosition = subtitleStyles.bottomMargin,
   onTimeUpdate 
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -86,7 +88,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
             <div 
               className={styles.subtitleOverlay}
               style={{
-                bottom: `${subtitleStyles.bottomMargin}px`,
+                bottom: `${bottomPosition}px`,
                 backgroundColor: subtitleStyles.backgroundColor,
                 color: textColor,
                 padding: subtitleStyles.padding,

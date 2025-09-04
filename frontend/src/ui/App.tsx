@@ -16,6 +16,7 @@ const App: React.FC = () => {
   // Subtitle style controls
   const [subtitleFontSize, setSubtitleFontSize] = useState(18);
   const [subtitleColor, setSubtitleColor] = useState('#ffffff');
+  const [subtitlePosition, setSubtitlePosition] = useState(60);
 
   const handleUpload = async () => {
     if (!file) return;
@@ -78,7 +79,7 @@ const App: React.FC = () => {
     if (videoFilename) {
       setIsDownloading(true);
       try {
-        const response = await fetch(`http://localhost:8000/download/video/${videoFilename}?fontSize=${subtitleFontSize}&color=${encodeURIComponent(subtitleColor)}`);
+        const response = await fetch(`http://localhost:8000/download/video/${videoFilename}?fontSize=${subtitleFontSize}&color=${encodeURIComponent(subtitleColor)}&position=${subtitlePosition}`);
         if (response.ok) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
@@ -189,6 +190,17 @@ const App: React.FC = () => {
                       className={styles.colorPicker}
                     />
                   </label>
+                  <label>
+                    Position: {subtitlePosition}px from bottom
+                    <input
+                      type="range"
+                      min="10"
+                      max="200"
+                      value={subtitlePosition}
+                      onChange={(e) => setSubtitlePosition(Number(e.target.value))}
+                      className={styles.slider}
+                    />
+                  </label>
                 </div>
               </div>
               
@@ -197,6 +209,7 @@ const App: React.FC = () => {
                 subtitles={subtitles}
                 fontSize={subtitleFontSize}
                 textColor={subtitleColor}
+                bottomPosition={subtitlePosition}
                 onTimeUpdate={(time) => {
                   console.log('Current time:', time);
                 }}
