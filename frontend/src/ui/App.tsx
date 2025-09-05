@@ -17,6 +17,7 @@ const App: React.FC = () => {
   const [subtitleFontSize, setSubtitleFontSize] = useState(18);
   const [subtitleColor, setSubtitleColor] = useState('#ffffff');
   const [subtitlePosition, setSubtitlePosition] = useState(60);
+  const [subtitleFont, setSubtitleFont] = useState('Arial');
 
   const handleUpload = async () => {
     if (!file) return;
@@ -89,7 +90,7 @@ const App: React.FC = () => {
         });
 
         // Then download video with updated subtitles
-        const response = await fetch(`http://localhost:8000/download/video/${videoFilename}?fontSize=${subtitleFontSize}&color=${encodeURIComponent(subtitleColor)}&position=${subtitlePosition}`);
+        const response = await fetch(`http://localhost:8000/download/video/${videoFilename}?fontSize=${subtitleFontSize}&color=${encodeURIComponent(subtitleColor)}&position=${subtitlePosition}&font=${encodeURIComponent(subtitleFont)}`);
         if (response.ok) {
           const blob = await response.blob();
           const url = window.URL.createObjectURL(blob);
@@ -175,6 +176,23 @@ const App: React.FC = () => {
                 <h3>🎨 Subtitle Style</h3>
                 <div className={styles.controlGroup}>
                   <label>
+                    Font Family:
+                    <select
+                      value={subtitleFont}
+                      onChange={(e) => setSubtitleFont(e.target.value)}
+                      className={styles.fontSelect}
+                    >
+                      <option value="Arial">Arial</option>
+                      <option value="Tahoma">Tahoma</option>
+                      <option value="Vazir">Vazir</option>
+                      <option value="Sahel">Sahel</option>
+                      <option value="Samim">Samim</option>
+                      <option value="Shabnam">Shabnam</option>
+                      <option value="IRANSans">IRANSans</option>
+                      <option value="B Nazanin">B Nazanin</option>
+                    </select>
+                  </label>
+                  <label>
                     Font Size: {subtitleFontSize}px
                     <input
                       type="range"
@@ -214,6 +232,7 @@ const App: React.FC = () => {
                 fontSize={subtitleFontSize}
                 textColor={subtitleColor}
                 bottomPosition={subtitlePosition}
+                fontFamily={subtitleFont}
                 onSubtitleChange={setSubtitles}
                 onTimeUpdate={(time) => {
                   console.log('Current time:', time);

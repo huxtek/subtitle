@@ -176,7 +176,7 @@ async def update_subtitles(filename: str, subtitles: List[Dict[str, Any]]):
         raise HTTPException(status_code=500, detail=f"Error updating subtitles: {str(e)}")
 
 @app.get("/download/video/{filename}")
-async def download_video_with_subtitles(filename: str, fontSize: int = 18, color: str = "#ffffff", position: int = 60):
+async def download_video_with_subtitles(filename: str, fontSize: int = 18, color: str = "#ffffff", position: int = 60, font: str = "Arial"):
     """Download video with embedded subtitles"""
     video_path = f"uploads/{filename}"
     srt_path = f"uploads/{filename.rsplit('.', 1)[0]}.srt"
@@ -201,7 +201,7 @@ async def download_video_with_subtitles(filename: str, fontSize: int = 18, color
     # Use dynamic styling from frontend
     smaller_font_size = int(fontSize * 0.6)  # Make it 60% of selected size
     bottom_margin = max(10, position // 3)  # Scale position for FFmpeg
-    subtitle_filter = f"subtitles={srt_path}:force_style='FontSize={smaller_font_size},Bold=1,PrimaryColour={ffmpeg_color},BackColour=&Hcc000000,BorderStyle=4,Alignment=2,MarginV={bottom_margin}'"
+    subtitle_filter = f"subtitles={srt_path}:force_style='FontName={font},FontSize={smaller_font_size},Bold=1,PrimaryColour={ffmpeg_color},BackColour=&Hcc000000,BorderStyle=4,Alignment=2,MarginV={bottom_margin}'"
     
     cmd = [
         'ffmpeg', '-i', video_path, '-vf', subtitle_filter,

@@ -11,6 +11,7 @@ interface VideoPlayerProps {
   fontSize?: number;
   textColor?: string;
   bottomPosition?: number;
+  fontFamily?: string;
   onTimeUpdate?: (currentTime: number) => void;
   onSubtitleChange?: (subtitles: Subtitle[]) => void;
 }
@@ -21,6 +22,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
   fontSize = subtitleStyles.fontSize,
   textColor = subtitleStyles.color,
   bottomPosition = subtitleStyles.bottomMargin,
+  fontFamily = subtitleStyles.fontFamily,
   onTimeUpdate,
   onSubtitleChange
 }) => {
@@ -104,7 +106,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
                 borderRadius: subtitleStyles.borderRadius,
                 fontSize: `${fontSize}px`,
                 fontWeight: subtitleStyles.fontWeight,
-                fontFamily: subtitleStyles.fontFamily,
+                fontFamily: fontFamily,
               }}
             >
               {currentSubtitle.text}

@@ -258,6 +258,15 @@
   cursor: pointer;
 }
 
+.fontSelect {
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
 .colorPicker {
   width: 50px;
   height: 35px;
